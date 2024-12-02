@@ -7,72 +7,87 @@
 #
 # o objetivo deste tutorial eh o de configurar o raspberry pi para ser
 # um access point e um gateway. Desta forma, o raspberry pi utilizara 
-# uma conexao wifi(access point) e uma conexao ethernet(gateway).
+# uma conexão wifi(access point) e uma conexão ethernet(gateway).
 
 # INSTALACAO
 #
-# instalacao dos aplicativos dnsmasq para ser o servidor dhcp e o software
+# instalação dos aplicativos para ser o servidor dhcp e o software
 # hostapd para tornar o raspberry pi um access point
 #
-$ sudo apt-get install hostapd isc-dhcp-server
+$ sudo apt-get install hostapd kea-dhcp4-server iptables
 
-# CONFIGURACÃO DAS INTERFACES DE REDE
+# CONFIGURAÇÃO DAS INTERFACES DE REDE
 #
-$ sudo vi /etc/network/interfaces
+$ cat /etc/systemd/network/10-eth0.network
+[Match]
+Name=eth0
 
-auto lo
-iface lo inet loopback
+[Network]
+Address=192.168.1.13/24
+Gateway=192.168.1.1
+DNS=192.168.1.12
 
-auto eth0
-iface eth0 inet static
-	address 192.168.1.12/24
-	gateway 192.168.1.1
+$ cat /etc/systemd/network/20-wlan0.network
+[Match]
+Name=wlan0
 
-allow-hotplug wlan0
-iface wlan0 inet static
-	address 192.168.10.1
-	netmask 255.255.255.0
+[Network]
+Address=192.168.10.1/24
+DNS=192.168.1.12
+IPForward=yes
 
 # REINICIALIZAR AS INTERFACES DE REDE
 #
-$ sudo ifdown --force eth0
-$ sudo ifdown --force wlan0
-$ sudo ifup eth0
-$ sudo ifup wlan0
+$ sudo systemctl enable systemd-networkd
+$ sudo systemctl restart systemd-networkd
+
+$ ip addr show eth0
+$ ip addr show wlan0
 
 # CONFIGURACAO DO SERVIDOR DHCP
 #
-$ sudo cat /etc/dhcp/dhcpd.conf
+$ sudo mv /etc/kea/kea-dhcp4.conf /etc/kea/kea-dhcp4.conf.BKP
+$ sudo cat /etc/kea/kea-dhcp4.conf
 
-# If this DHCP server is the official DHCP server for the local
-# network, the authoritative directive should be uncommented.
-authoritative;
-
-subnet 192.168.10.0 netmask 255.255.255.0 {
-	range 192.168.10.50 192.168.10.100;
-	option broadcast-address 192.168.10.255;
-	option routers 192.168.10.1;
-	default-lease-time 600;
-	max-lease-time 7200;
-	option domain-name "particula.local";
-	option domain-name-servers 192.168.1.11;
+{
+    "Dhcp4": {
+        "interfaces-config": {
+            "interfaces": ["wlan0"]
+        },
+        "subnet4": [
+            {
+                "subnet": "192.168.10.0/24",
+                "pools": [
+                    {
+                        "pool": "192.168.10.100 - 192.168.10.200"
+                    }
+                ],
+                "option-data": [
+                    {
+                        "name": "router",
+                        "data": "192.168.10.1"
+                    },
+                    {
+                        "name": "dns-servers",
+                        "data": "192.168.1.12"
+                    }
+                ]
+            }
+        ]
+    }
 }
 
-$ sudo vi /etc/default/isc-dhcp-server
-
-# On what interfaces should the DHCP server (dhcpd) serve DHCP requests?
-# Separate multiple interfaces with spaces, e.g. "eth0 eth1".
-INTERFACESv4="wlan0"
-
 # Systemd
-$ sudo systemctl restart isc-dhcp-server
-$ sudo systemctl status isc-dhcp-server
-$ sudo systemctl enable isc-dhcp-server
+$ sudo systemctl restart kea-dhcp4-server.service
+$ sudo systemctl status kea-dhcp4-server.service
+$ sudo systemctl enable kea-dhcp4-server.service
 
-# CONFIGURACAO DO ACCESS POINT(WLAN0)
+# CONFIGURAÇÃO DO ACCESS POINT(WLAN0)
 #
-# alterar os parametros "interface=wlan0", "ssid=AP_NAME" e 
-# "wpa_passphrase=AP_PASSWORD"
+# alterar os parâmetros : 
+# - "interface=wlan0"
+# - "ssid=AP_NAME"
+# - "wpa_passphrase=AP_PASSWORD"
 #
 $ sudo vi /etc/hostapd/hostapd.conf
 
@@ -104,9 +119,10 @@ $ sudo systemctl enable hostapd
 
 # SCRIPT DE FIREWALL
 #
-# ativar a opcao de NAT.
+# ativar a opção de NAT.
 #
-$ sudo vi /etc/init.d/rc.firewall.sh
+$ sudo cat /etc/init.d/rc.firewall.sh
+
 #!/bin/bash
 
 IPTABLES=/sbin/iptables
@@ -133,7 +149,8 @@ $IPTABLES -t filter -P FORWARD ACCEPT
 
 # SYSTEMD
 #
-$ sudo vi /etc/systemd/system/rc.firewall.service
+$ sudo cat /etc/systemd/system/rc.firewall.service
+
 [Unit]
 Description=Firewall Script
 After=network.target
