@@ -46,36 +46,69 @@ $ ip addr show wlan0
 
 # CONFIGURACAO DO SERVIDOR DHCP
 #
+
+# pré-configuração
+$ sudo groupadd --system kea
+$ sudo useradd --system --no-create-home --gid kea kea
+$ sudo chown kea:kea /var/log/kea-dhcp4.log
+$ sudo chmod 640 /var/log/kea-dhcp4.log
+$ sudo systemctl restart kea-dhcp4
+
 $ sudo mv /etc/kea/kea-dhcp4.conf /etc/kea/kea-dhcp4.conf.BKP
 $ sudo cat /etc/kea/kea-dhcp4.conf
 
 {
-    "Dhcp4": {
-        "interfaces-config": {
-            "interfaces": ["wlan0"]
-        },
-        "subnet4": [
-            {
-                "subnet": "192.168.10.0/24",
-                "pools": [
-                    {
-                        "pool": "192.168.10.100 - 192.168.10.200"
-                    }
-                ],
-                "option-data": [
-                    {
-                        "name": "router",
-                        "data": "192.168.10.1"
-                    },
-                    {
-                        "name": "dns-servers",
-                        "data": "192.168.1.12"
-                    }
-                ]
-            }
+  "Dhcp4": {
+    "interfaces-config": {
+      "interfaces": [
+        "wlan0"
+      ]
+    },
+    "lease-database": {
+      "type": "memfile",
+      "persist": true,
+      "name": "/var/lib/kea/dhcp4.leases"
+    },
+    "valid-lifetime": 28800,
+    "option-data": [
+      {
+        "name": "domain-name-servers",
+        "data": "192.168.1.12"
+      }
+    ],
+    "subnet4": [
+      {
+        "subnet": "192.168.10.0/24",
+        "pools": [
+          {
+            "pool": "192.168.10.100 - 192.168.10.199"
+          }
+        ],
+        "option-data": [
+          {
+            "name": "routers",
+            "data": "192.168.1.1"
+          }
         ]
-    }
+      }
+    ],
+    "loggers": [
+      {
+        "name": "kea-dhcp4",
+        "output_options": [
+          {
+            "output": "/var/log/kea/kea-dhcp4.log",
+            "maxver": 10
+          }
+        ],
+        "severity": "INFO"
+      }
+    ]
+  }
 }
+
+# verificar o arquivo de configuração
+$ sudo kea-dhcp4 -t /etc/kea/kea-dhcp4.conf
 
 # Systemd
 $ sudo systemctl restart kea-dhcp4-server.service
