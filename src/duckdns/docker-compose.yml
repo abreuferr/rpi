@@ -3,15 +3,15 @@ services:
   duckdns:
     image: lscr.io/linuxserver/duckdns:latest
     container_name: duckdns
-    network_mode: host #optional
+    network_mode: host
     environment:
-      - PUID=1000 #optional
-      - PGID=1000 #optional
-      - TZ=America/Sao_Paulo #optional
-      - SUBDOMAINS=ACRESCENTAR_SUBDOMINIO
-      - TOKEN=ACRESCENTAR_TOKEN
-      - UPDATE_IP=ipv4 #optional
-      - LOG_FILE=true #optional
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Sao_Paulo
+      - SUBDOMAINS=<domain>
+      - TOKEN=<password>
+      - UPDATE_IP=ipv4
+      - LOG_FILE=true
     volumes:
-      - ${HOME}/duckdns/config:/config #optional
+      - ./config:/config
     restart: unless-stopped

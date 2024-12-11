@@ -1,0 +1,13 @@
+services:
+  netalertx:
+    container_name: netalertx
+    image: "jokobsk/netalertx:latest"      
+    network_mode: "host"        
+    restart: unless-stopped
+    volumes:
+      - ./config:/app/config
+      - ./db:/app/db      
+      - ./logs:/app/log
+    environment:
+      - TZ=America/Sao_Paulo
+      - PORT=8083
