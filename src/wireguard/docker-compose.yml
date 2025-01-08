@@ -10,11 +10,11 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=America/Sao_Paulo
-      - SERVERURL=<domain>
+      - SERVERURL=IP_EXTERNO
       - SERVERPORT=51820
       - PEERS=1
-      - PEERDNS=192.168.1.12
-      - INTERNAL_SUBNET=192.168.1.0
+      - PEERDNS=IP_DNS
+      - INTERNAL_SUBNET=REDE_LOCAL
       - ALLOWEDIPS=0.0.0.0/0
       - PERSISTENTKEEPALIVE_PEERS=all
       - LOG_CONFS=true
