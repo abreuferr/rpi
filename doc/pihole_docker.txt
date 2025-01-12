@@ -3,9 +3,10 @@
 #: Description : Raspberry Pi com Docker e Pi-Hole
 #: Options : None
 
-# controle de memoria e cpu
-$ sudo vi /boot/firmware/cmdline.txt
-(...) cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory
+# controle de memoria, cpu e swap
+$ sudo cat /boot/firmware/cmdline.txt
+$ sudo cat /boot/cmdline.txt
+(...) cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory swapaccount=1
 $ reboot
 
 # Docker Compose
