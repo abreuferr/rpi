@@ -1,10 +1,10 @@
 #: Title : Raspberry Pi e DDNS e RPI
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
 #: Description : Transformar um raspberry pi em um client DDNS
-#: Options : None
+#: Options : https://github.com/noipcom/linux-update-client-docker/pkgs/container/noip-duc
 
 $ cat noip-duc.env
-NOIP_USERNAME=USUARIO@DDOMINIO>COM
+NOIP_USERNAME=USUARIO
 NOIP_PASSWORD=SENHA
 NOIP_HOSTNAMES=all.ddnskey.com
 
