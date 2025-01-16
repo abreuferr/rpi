@@ -22,3 +22,14 @@ $ pihole -a -p somepasswordhere
 
 # atualização do pihole
 $ docker pull pihole/pihole && docker rm -f pihole && docker-compose -f pihole/docker-compose.yml up -d && docker system prune --all --force
+
+#
+# Extra
+#
+
+$ docker ps
+$ docker exec -it <container_name_or_id> bash
+$ pihole -g
+$ exit
+
+$ docker exec <container_name_or_id> pihole -g
