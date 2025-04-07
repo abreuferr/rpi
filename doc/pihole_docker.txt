@@ -21,7 +21,7 @@ $ docker exec -it pihole /bin/bash
 $ pihole -a -p somepasswordhere
 
 # atualização do pihole
-$ docker pull pihole/pihole && docker rm -f pihole && docker-compose -f pihole/docker-compose.yml up -d && docker system prune --all --force
+$ docker pull pihole/pihole && docker rm -f pihole && docker-compose -f docker-compose.yml up -d && docker system prune --all --force
 
 #
 # Extra
