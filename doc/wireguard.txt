@@ -1,0 +1,11 @@
+#: Title : wireguuard
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Transformar um raspberry pi em uma vpn com o wireguard
+#: Options : None
+
+#
+# QRCODE
+#
+
+$ sudo apt install qrencode
+$ qrencode -t ansiutf8 < config/peer1/peer1.conf
