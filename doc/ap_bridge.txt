@@ -1,0 +1,72 @@
+# INSTALAÇÃO
+
+$ sudo apt install hostapd bridge-utils
+
+# CONFIGURAÇÃO DE REDES
+
+$ cat /etc/systemd/network/eth0.network
+[Match]
+Name=eth0
+[Network]
+Bridge=br0
+
+$ cat /etc/systemd/network/20-wlan0-static.network
+[Match]
+Name=wlan0
+[Network]
+Bridge=br0
+
+$ sudo cat /etc/systemd/network/bridge-br0.netdev
+[NetDev]
+Name=br0
+Kind=bridge
+
+$ cat /etc/systemd/network/bridge.network
+[Match]
+Name=br0
+[Network]
+Address=192.168.1.12/24
+Gateway=192.168.1.1
+IPv6AcceptRA=no
+LinkLocalAddressing=no
+
+# CONFIGURAÇÃO DO HOSTAP
+
+$ cat /etc/hostapd/hostapd.conf
+interface=wlan0
+bridge=br0
+ssid=REDE_WIFI
+hw_mode=g
+channel=7
+wmm_enabled=0
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+wpa=2
+wpa_passphrase=SENHA_WIFI
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP
+rsn_pairwise=CCMP
+ieee80211n=1
+wmm_enabled=1
+country_code=BR
+max_num_sta=10
+beacon_int=100
+dtim_period=2
+rts_threshold=2347
+fragm_threshold=2346
+
+$ cat /etc/default/hostapd
+DAEMON_CONF="/etc/hostapd/hostapd.conf"
+
+$ sudo systemctl unmask hostapd
+$ sudo systemctl restart hostapd
+$ sudo systemctl status hostapd
+$ sudo systemctl enable hostapd
+
+$ sudo systemctl restart systemd-networkd
+$ sudo systemctl enable systemd-networkd
+
+# NAT
+$ echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
+$ sudo sysctl -p
